@@ -40,18 +40,29 @@ def check_winner(board):
 def is_board_full(board):
     return all(cell != " " for row in board for cell in row)
 
-def main():
-    board = [[" " for _ in range(3)] for _ in range(3)]
-    current_player = "X"
-    
-    print("틱택토 게임을 시작합니다!")
-    print("1-9 사이의 숫자를 입력하여 위치를 선택하세요:")
+def show_start_screen():
+    print("=" * 40)
+    print("           틱택토 게임에 오신 것을 환영합니다!")
+    print("=" * 40)
+    print("\n게임 규칙:")
+    print("1. 두 명의 플레이어가 번갈아가며 X와 O를 표시합니다.")
+    print("2. 3x3 보드에서 가로, 세로, 또는 대각선으로 같은 표시를 먼저 완성하면 승리합니다.")
+    print("3. 1-9 사이의 숫자를 입력하여 원하는 위치에 표시를 합니다.")
+    print("\n보드 위치:")
     print("1 | 2 | 3")
     print("---------")
     print("4 | 5 | 6")
     print("---------")
     print("7 | 8 | 9")
-    print()
+    print("\n게임을 시작하려면 Enter 키를 누르세요...")
+    input()
+
+def main():
+    board = [[" " for _ in range(3)] for _ in range(3)]
+    current_player = "X"
+    
+    show_start_screen()
+    print("\n게임을 시작합니다!")
     
     while True:
         print_board(board)
@@ -89,4 +100,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
