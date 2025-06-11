@@ -17,27 +17,67 @@ Step 4: To try out cursor on your own projects, go to the file menu (top left) a
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
+function StartScreen({ onStart }) {
+  return (
+    <div style={{ textAlign: 'center', marginTop: '80px' }}>
+      <h1>틱택토 게임 (4x4)</h1>
+      <p>두 명이 번갈아가며 X와 O를 놓고, 가로/세로/대각선으로 4개를 먼저 맞추면 승리합니다.</p>
+      <button 
+        style={{ fontSize: '20px', padding: '10px 30px', cursor: 'pointer' }}
+        onClick={onStart}
+      >
+        게임 시작
+      </button>
+    </div>
+  );
+}
+
 function TicTacToe() {
-  const [board, setBoard] = React.useState(Array(9).fill(null));
+  const size = 4;
+  const [board, setBoard] = React.useState(Array(size * size).fill(null));
   const [isXNext, setIsXNext] = React.useState(true);
 
   const calculateWinner = (squares) => {
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
-
-    for (let i = 0; i < lines.length; i++) {
-      const [a, b, c] = lines[i];
-      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-        return squares[a];
+    // 가로
+    for (let row = 0; row < size; row++) {
+      let start = row * size;
+      if (
+        squares[start] &&
+        squares[start] === squares[start + 1] &&
+        squares[start] === squares[start + 2] &&
+        squares[start] === squares[start + 3]
+      ) {
+        return squares[start];
       }
+    }
+    // 세로
+    for (let col = 0; col < size; col++) {
+      if (
+        squares[col] &&
+        squares[col] === squares[col + size] &&
+        squares[col] === squares[col + size * 2] &&
+        squares[col] === squares[col + size * 3]
+      ) {
+        return squares[col];
+      }
+    }
+    // 대각선 (좌상-우하)
+    if (
+      squares[0] &&
+      squares[0] === squares[5] &&
+      squares[0] === squares[10] &&
+      squares[0] === squares[15]
+    ) {
+      return squares[0];
+    }
+    // 대각선 (우상-좌하)
+    if (
+      squares[3] &&
+      squares[3] === squares[6] &&
+      squares[3] === squares[9] &&
+      squares[3] === squares[12]
+    ) {
+      return squares[3];
     }
     return null;
   };
@@ -53,22 +93,22 @@ function TicTacToe() {
   };
 
   const winner = calculateWinner(board);
-  const status = winner 
-    ? `승자: ${winner}` 
-    : board.every(square => square) 
-    ? '무승부!' 
+  const status = winner
+    ? `승자: ${winner}`
+    : board.every(square => square)
+    ? '무승부!'
     : `다음 플레이어: ${isXNext ? 'X' : 'O'}`;
 
   const renderSquare = (i) => {
     return (
-      <button 
-        className="square" 
+      <button
+        className="square"
         onClick={() => handleClick(i)}
         style={{
-          width: '60px',
-          height: '60px',
-          margin: '4px',
-          fontSize: '24px',
+          width: '50px',
+          height: '50px',
+          margin: '2px',
+          fontSize: '22px',
           fontWeight: 'bold',
           backgroundColor: '#fff',
           border: '1px solid #999',
@@ -80,39 +120,31 @@ function TicTacToe() {
     );
   };
 
+  // 4x4 보드 렌더링
+  const boardRows = [];
+  for (let row = 0; row < size; row++) {
+    const rowSquares = [];
+    for (let col = 0; col < size; col++) {
+      rowSquares.push(renderSquare(row * size + col));
+    }
+    boardRows.push(
+      <div key={row} style={{ display: 'flex' }}>
+        {rowSquares}
+      </div>
+    );
+  }
+
   return (
     <div style={{ textAlign: 'center', marginTop: '20px' }}>
       <div style={{ marginBottom: '20px', fontSize: '20px' }}>{status}</div>
-      <div style={{ display: 'inline-block' }}>
-        <div style={{ display: 'flex' }}>
-          {renderSquare(0)}
-          {renderSquare(1)}
-          {renderSquare(2)}
-        </div>
-        <div style={{ display: 'flex' }}>
-          {renderSquare(3)}
-          {renderSquare(4)}
-          {renderSquare(5)}
-        </div>
-        <div style={{ display: 'flex' }}>
-          {renderSquare(6)}
-          {renderSquare(7)}
-          {renderSquare(8)}
-        </div>
-      </div>
+      <div style={{ display: 'inline-block' }}>{boardRows}</div>
     </div>
   );
 }
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <h1>틱택토 게임</h1>
-        <TicTacToe />
-      </header>
-    </div>
-  );
+  const [started, setStarted] = React.useState(false);
+  return started ? <TicTacToe /> : <StartScreen onStart={() => setStarted(true)} />;
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
