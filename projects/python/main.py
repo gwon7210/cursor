@@ -13,90 +13,101 @@ Step 3: Try highlighting all the code with your mouse, then hit Cmd+k or Ctrl+K.
 
 Step 4: To try out cursor on your own projects, go to the file menu (top left) and open a folder.
 '''
-def print_board(board):
-    for row in board:
-        print(" | ".join(row))
-        print("-" * 9)
+import tkinter as tk
+from tkinter import messagebox
 
-def check_winner(board):
-    # 가로 확인
-    for row in board:
-        if row.count(row[0]) == len(row) and row[0] != " ":
-            return row[0]
-    
-    # 세로 확인
-    for col in range(3):
-        if board[0][col] == board[1][col] == board[2][col] != " ":
-            return board[0][col]
-    
-    # 대각선 확인
-    if board[0][0] == board[1][1] == board[2][2] != " ":
-        return board[0][0]
-    if board[0][2] == board[1][1] == board[2][0] != " ":
-        return board[0][2]
-    
-    return None
-
-def is_board_full(board):
-    return all(cell != " " for row in board for cell in row)
-
-def show_start_screen():
-    print("=" * 40)
-    print("           틱택토 게임에 오신 것을 환영합니다!")
-    print("=" * 40)
-    print("\n게임 규칙:")
-    print("1. 두 명의 플레이어가 번갈아가며 X와 O를 표시합니다.")
-    print("2. 3x3 보드에서 가로, 세로, 또는 대각선으로 같은 표시를 먼저 완성하면 승리합니다.")
-    print("3. 1-9 사이의 숫자를 입력하여 원하는 위치에 표시를 합니다.")
-    print("\n보드 위치:")
-    print("1 | 2 | 3")
-    print("---------")
-    print("4 | 5 | 6")
-    print("---------")
-    print("7 | 8 | 9")
-    print("\n게임을 시작하려면 Enter 키를 누르세요...")
-    input()
-
-def main():
-    board = [[" " for _ in range(3)] for _ in range(3)]
-    current_player = "X"
-    
-    show_start_screen()
-    print("\n게임을 시작합니다!")
-    
-    while True:
-        print_board(board)
+class TicTacToe:
+    def __init__(self):
+        self.window = tk.Tk()
+        self.window.title("틱택토 게임")
+        self.window.geometry("300x350")
         
-        try:
-            position = int(input(f"플레이어 {current_player}의 차례입니다. 위치를 선택하세요 (1-9): ")) - 1
-            row = position // 3
-            col = position % 3
+        self.current_player = "X"
+        self.board = [[" " for _ in range(3)] for _ in range(3)]
+        
+        # 게임 상태 표시 레이블
+        self.status_label = tk.Label(
+            self.window,
+            text=f"플레이어 {self.current_player}의 차례",
+            font=('Arial', 12)
+        )
+        self.status_label.pack(pady=10)
+        
+        # 게임 보드 프레임
+        self.board_frame = tk.Frame(self.window)
+        self.board_frame.pack()
+        
+        # 버튼 생성
+        self.buttons = []
+        for i in range(3):
+            for j in range(3):
+                button = tk.Button(
+                    self.board_frame,
+                    text="",
+                    font=('Arial', 20),
+                    width=5,
+                    height=2,
+                    command=lambda row=i, col=j: self.make_move(row, col)
+                )
+                button.grid(row=i, column=j, padx=5, pady=5)
+                self.buttons.append(button)
+        
+        # 재시작 버튼
+        restart_button = tk.Button(
+            self.window,
+            text="게임 재시작",
+            font=('Arial', 12),
+            command=self.restart_game
+        )
+        restart_button.pack(pady=20)
+        
+    def make_move(self, row, col):
+        if self.board[row][col] == " ":
+            self.board[row][col] = self.current_player
+            self.buttons[row * 3 + col].config(text=self.current_player)
             
-            if position < 0 or position > 8:
-                print("1-9 사이의 숫자를 입력하세요!")
-                continue
-                
-            if board[row][col] != " ":
-                print("이미 선택된 위치입니다!")
-                continue
-                
-            board[row][col] = current_player
-            
-            winner = check_winner(board)
-            if winner:
-                print_board(board)
-                print(f"플레이어 {winner}가 이겼습니다!")
-                break
-                
-            if is_board_full(board):
-                print_board(board)
-                print("무승부입니다!")
-                break
-                
-            current_player = "O" if current_player == "X" else "X"
-            
-        except ValueError:
-            print("올바른 숫자를 입력하세요!")
+            if self.check_winner():
+                messagebox.showinfo("게임 종료", f"플레이어 {self.current_player}가 이겼습니다!")
+                self.restart_game()
+            elif self.is_board_full():
+                messagebox.showinfo("게임 종료", "무승부입니다!")
+                self.restart_game()
+            else:
+                self.current_player = "O" if self.current_player == "X" else "X"
+                self.status_label.config(text=f"플레이어 {self.current_player}의 차례")
+    
+    def check_winner(self):
+        # 가로 확인
+        for row in self.board:
+            if row.count(row[0]) == len(row) and row[0] != " ":
+                return True
+        
+        # 세로 확인
+        for col in range(3):
+            if self.board[0][col] == self.board[1][col] == self.board[2][col] != " ":
+                return True
+        
+        # 대각선 확인
+        if self.board[0][0] == self.board[1][1] == self.board[2][2] != " ":
+            return True
+        if self.board[0][2] == self.board[1][1] == self.board[2][0] != " ":
+            return True
+        
+        return False
+    
+    def is_board_full(self):
+        return all(cell != " " for row in self.board for cell in row)
+    
+    def restart_game(self):
+        self.board = [[" " for _ in range(3)] for _ in range(3)]
+        self.current_player = "X"
+        self.status_label.config(text=f"플레이어 {self.current_player}의 차례")
+        for button in self.buttons:
+            button.config(text="")
+    
+    def run(self):
+        self.window.mainloop()
 
 if __name__ == "__main__":
-    main()
+    game = TicTacToe()
+    game.run()
